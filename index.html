@@ -41,7 +41,6 @@
       gap: 1.5rem;
     }
 
-    /* Logo */
     .logo-wrap {
       position: relative;
       width: clamp(110px, 28vw, 160px);
@@ -70,7 +69,6 @@
       object-fit: cover;
     }
 
-    /* Title */
     .title-block { text-align: center; }
     .title-block h1 {
       font-family: 'Playfair Display', serif;
@@ -88,14 +86,12 @@
       text-transform: uppercase;
     }
 
-    /* Divider */
     .divider {
       width: 60%;
       height: 1px;
       background: linear-gradient(90deg, transparent, #c8860a55, #f5c84288, #c8860a55, transparent);
     }
 
-    /* Buttons */
     .btn-group {
       width: 100%;
       display: flex;
@@ -174,7 +170,6 @@
 
     .btn-icon { font-size: 1.2em; flex-shrink: 0; }
 
-    /* Footer */
     .footer {
       font-size: 0.72rem;
       color: #4a3820;
@@ -182,7 +177,7 @@
       text-align: center;
     }
 
-    /* ===== BOTTOM BANNER ===== */
+    /* BOTTOM BANNER */
     .bottom-banner {
       position: fixed;
       bottom: 0;
@@ -255,7 +250,43 @@
     }
     .banner-close:hover { opacity: 1; color: #f5c842; }
 
-    /* ===== MODAL ===== */
+    /* FLOATING BUTTON */
+    .fab-mitla {
+      position: fixed;
+      bottom: 1.2rem;
+      right: 1.2rem;
+      z-index: 50;
+      display: none;
+      align-items: center;
+      gap: 0.5rem;
+      padding: 0.65rem 1.1rem;
+      border-radius: 999px;
+      background: linear-gradient(135deg, #c8860a, #f5c842);
+      color: #1a0e00;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: 0.04em;
+      box-shadow: 0 4px 20px rgba(200,134,10,0.55), 0 0 0 0 rgba(245,200,66,0.4);
+      transition: transform 0.15s, box-shadow 0.15s;
+      white-space: nowrap;
+    }
+    .fab-mitla.visible {
+      display: flex;
+      animation: fabPulse 2.5s ease infinite;
+    }
+    .fab-mitla:hover {
+      transform: translateY(-3px) scale(1.05);
+      box-shadow: 0 8px 28px rgba(245,200,66,0.65);
+      animation: none;
+    }
+    @keyframes fabPulse {
+      0%, 100% { box-shadow: 0 4px 20px rgba(200,134,10,0.55), 0 0 0 0 rgba(245,200,66,0.4); }
+      50%       { box-shadow: 0 4px 20px rgba(200,134,10,0.55), 0 0 0 8px rgba(245,200,66,0); }
+    }
+
+    /* MODAL */
     .modal-overlay {
       display: none;
       position: fixed;
@@ -266,10 +297,8 @@
       align-items: center;
       justify-content: center;
       padding: 1rem;
-      animation: fadeIn 0.2s ease;
     }
     .modal-overlay.active { display: flex; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
 
     .modal {
       background: linear-gradient(160deg, #1a1208 0%, #0f0b06 100%);
@@ -346,8 +375,6 @@
 <body>
 
 <div class="container">
-
-  <!-- Logo -->
   <div class="logo-wrap">
     <div class="logo-ring"></div>
     <div class="logo-inner">
@@ -355,7 +382,6 @@
     </div>
   </div>
 
-  <!-- Title -->
   <div class="title-block">
     <h1>Barbacoa de la<br>Casa Vieja</h1>
     <p>✦ Tradición en cada bocado ✦</p>
@@ -363,7 +389,6 @@
 
   <div class="divider"></div>
 
-  <!-- Buttons -->
   <div class="btn-group">
     <a href="https://Barbacoa-La-Casa-Vieja.github.io/Men-" target="_blank" class="btn btn-gold">
       <span class="btn-icon">🍽️</span> Menú
@@ -391,8 +416,13 @@
   <a href="https://cronos6xlab.github.io/Barbacoa-La_Casa_Vieja/" target="_blank" class="banner-cta">
     Ver más →
   </a>
-  <button class="banner-close" onclick="document.getElementById('bottomBanner').style.display='none'" title="Cerrar">✕</button>
+  <button class="banner-close" onclick="closeBanner()" title="Cerrar">✕</button>
 </div>
+
+<!-- Floating Button -->
+<a href="https://cronos6xlab.github.io/Barbacoa-La_Casa_Vieja/" target="_blank" class="fab-mitla" id="fabMitla">
+  🧂 Gran Mitla
+</a>
 
 <!-- Spotify Modal -->
 <div class="modal-overlay" id="spotifyModal" onclick="closeOnOverlay(event)">
@@ -435,6 +465,18 @@
     if (e.target === document.getElementById('spotifyModal')) closeModal();
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
+
+  function closeBanner() {
+    const banner = document.getElementById('bottomBanner');
+    banner.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    banner.style.transform = 'translateY(100%)';
+    banner.style.opacity = '0';
+    setTimeout(() => {
+      banner.style.display = 'none';
+      const fab = document.getElementById('fabMitla');
+      fab.classList.add('visible');
+    }, 300);
+  }
 </script>
 
 </body>
