@@ -1,461 +1,859 @@
 <!DOCTYPE html>
-<html lang="es">
+<html lang="es" data-theme="dark">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Barbacoa de la Casa Vieja</title>
-  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Inter:wght@400;500;600&display=swap" rel="stylesheet"/>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,400;0,600;0,700;1,400;1,600&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
   <style>
+    /* ─── Design Tokens ─────────────────────────── */
+    :root {
+      --gold-dim:    #8b6014;
+      --gold-mid:    #c8860a;
+      --gold-bright: #f5c842;
+      --gold-pale:   #fde9c0;
+      --bg:          #080604;
+      --surface:     #100d08;
+      --surface-2:   #18130b;
+      --surface-3:   #211810;
+      --border:      rgba(200,134,10,0.18);
+      --border-hi:   rgba(245,200,66,0.45);
+      --text:        #f0e8d8;
+      --text-muted:  #a08860;
+      --text-faint:  #4a3a25;
+      --spotify:     #1DB954;
+      --spotify-dim: #158a3e;
+
+      --space-1: 0.25rem;
+      --space-2: 0.5rem;
+      --space-3: 0.75rem;
+      --space-4: 1rem;
+      --space-5: 1.25rem;
+      --space-6: 1.5rem;
+      --space-8: 2rem;
+
+      --radius-sm: 0.375rem;
+      --radius-md: 0.625rem;
+      --radius-lg: 1rem;
+      --radius-xl: 1.375rem;
+      --radius-full: 9999px;
+
+      --ease-out: cubic-bezier(0.16, 1, 0.3, 1);
+      --ease-in:  cubic-bezier(0.4, 0, 1, 1);
+
+      --font-display: 'Cormorant Garamond', 'Georgia', serif;
+      --font-body:    'DM Sans', 'Helvetica Neue', sans-serif;
+
+      --text-xs:   clamp(0.75rem,  0.7rem  + 0.25vw, 0.875rem);
+      --text-sm:   clamp(0.875rem, 0.8rem  + 0.35vw, 1rem);
+      --text-base: clamp(1rem,     0.95rem + 0.25vw, 1.125rem);
+      --text-lg:   clamp(1.125rem, 1rem    + 0.75vw, 1.5rem);
+      --text-xl:   clamp(1.5rem,   1.2rem  + 1.25vw, 2.25rem);
+      --text-2xl:  clamp(2rem,     1.2rem  + 2.5vw,  3.5rem);
+    }
+
+    /* ─── Reset & Base ──────────────────────────── */
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+    html { -webkit-font-smoothing: antialiased; scroll-behavior: smooth; }
 
     body {
-      min-height: 100vh;
-      font-family: 'Inter', sans-serif;
-      background: #0d0a07;
+      min-height: 100dvh;
+      font-family: var(--font-body);
+      font-size: var(--text-base);
+      background: var(--bg);
+      color: var(--text);
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
-      padding: 2rem 1rem 5rem;
+      padding: clamp(2rem, 5vw, 3rem) 1rem 6rem;
       overflow-x: hidden;
+      position: relative;
     }
 
-    body::before {
-      content: '';
+    /* ─── Ambient Background ─────────────────────── */
+    .bg-ambient {
       position: fixed;
       inset: 0;
-      background:
-        radial-gradient(ellipse 80% 60% at 50% -10%, rgba(180,100,20,0.25) 0%, transparent 70%),
-        radial-gradient(ellipse 60% 40% at 80% 100%, rgba(120,50,10,0.2) 0%, transparent 60%);
       pointer-events: none;
       z-index: 0;
+      overflow: hidden;
+    }
+    .bg-ambient::before {
+      content: '';
+      position: absolute;
+      top: -20%;
+      left: 50%;
+      transform: translateX(-50%);
+      width: 140%;
+      height: 70%;
+      background: radial-gradient(ellipse at center top,
+        oklch(0.45 0.12 60 / 0.22) 0%,
+        oklch(0.30 0.09 40 / 0.10) 40%,
+        transparent 70%
+      );
+      filter: blur(40px);
+    }
+    .bg-ambient::after {
+      content: '';
+      position: absolute;
+      bottom: 0; left: 0; right: 0; height: 50%;
+      background: radial-gradient(ellipse at 30% 100%,
+        oklch(0.28 0.08 35 / 0.18) 0%, transparent 55%
+      ),
+      radial-gradient(ellipse at 80% 90%,
+        oklch(0.22 0.05 50 / 0.12) 0%, transparent 45%
+      );
+      filter: blur(30px);
     }
 
+    /* Subtle noise texture */
+    .bg-grain {
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      z-index: 0;
+      opacity: 0.025;
+      background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='300' height='300'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='300' height='300' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    }
+
+    /* ─── Main Container ──────────────────────────── */
     .container {
       position: relative;
       z-index: 1;
       width: 100%;
-      max-width: 480px;
+      max-width: 440px;
       display: flex;
       flex-direction: column;
       align-items: center;
-      gap: 1.5rem;
+      gap: clamp(1.25rem, 3vw, 1.75rem);
     }
 
+    /* ─── Logo ──────────────────────────────────── */
     .logo-wrap {
       position: relative;
-      width: clamp(110px, 28vw, 160px);
-      height: clamp(110px, 28vw, 160px);
+      width: clamp(100px, 26vw, 148px);
+      height: clamp(100px, 26vw, 148px);
     }
+
+    /* Animated conic border using @property */
+    @property --angle {
+      syntax: '<angle>';
+      initial-value: 0deg;
+      inherits: false;
+    }
+
     .logo-ring {
       position: absolute;
-      inset: -6px;
+      inset: -3px;
       border-radius: 50%;
-      background: conic-gradient(from 0deg, #c8860a, #f5c842, #c8860a, #8b5e0a, #c8860a);
-      animation: spin 8s linear infinite;
+      background: conic-gradient(
+        from var(--angle),
+        var(--gold-dim) 0deg,
+        var(--gold-bright) 72deg,
+        var(--gold-mid) 144deg,
+        var(--gold-dim) 216deg,
+        var(--gold-bright) 288deg,
+        var(--gold-dim) 360deg
+      );
+      animation: spin-ring 9s linear infinite;
+      mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #fff calc(100% - 3px));
+      -webkit-mask: radial-gradient(farthest-side, transparent calc(100% - 3px), #fff calc(100% - 3px));
     }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    /* Fallback for browsers without @property */
+    @keyframes spin-ring { to { --angle: 360deg; } }
+
+    .logo-glow {
+      position: absolute;
+      inset: -12px;
+      border-radius: 50%;
+      background: radial-gradient(circle, oklch(0.65 0.14 60 / 0.25) 0%, transparent 70%);
+      filter: blur(8px);
+      animation: pulse-glow 3s ease-in-out infinite;
+    }
+    @keyframes pulse-glow {
+      0%, 100% { opacity: 0.6; transform: scale(0.95); }
+      50%       { opacity: 1;   transform: scale(1.05); }
+    }
+
     .logo-inner {
       position: relative;
       width: 100%;
       height: 100%;
       border-radius: 50%;
       overflow: hidden;
-      border: 4px solid #0d0a07;
-      background: #1a1208;
+      border: 2.5px solid var(--bg);
+      background: var(--surface-2);
     }
     .logo-inner img {
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       object-fit: cover;
+      display: block;
     }
 
+    /* ─── Title ──────────────────────────────────── */
     .title-block { text-align: center; }
     .title-block h1 {
-      font-family: 'Playfair Display', serif;
-      font-size: clamp(1.5rem, 5vw, 2.2rem);
-      color: #f5c842;
-      line-height: 1.2;
-      text-shadow: 0 0 30px rgba(245,200,66,0.4);
-      letter-spacing: 0.02em;
+      font-family: var(--font-display);
+      font-size: clamp(1.7rem, 6vw, 2.5rem);
+      font-weight: 600;
+      color: var(--gold-bright);
+      line-height: 1.15;
+      letter-spacing: 0.01em;
+      text-shadow:
+        0 0 40px oklch(0.75 0.16 65 / 0.35),
+        0 1px 0 oklch(0.1 0.02 60 / 0.8);
     }
-    .title-block p {
-      margin-top: 0.4rem;
-      font-size: clamp(0.75rem, 2.5vw, 0.9rem);
-      color: #a07840;
-      letter-spacing: 0.12em;
+    .title-block h1 em {
+      font-style: italic;
+      color: var(--gold-pale);
+      display: block;
+      font-size: 0.92em;
+    }
+    .title-tagline {
+      margin-top: var(--space-2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: var(--space-2);
+      font-size: var(--text-xs);
+      color: var(--text-muted);
+      letter-spacing: 0.18em;
       text-transform: uppercase;
     }
+    .title-tagline::before, .title-tagline::after {
+      content: '';
+      display: block;
+      width: 28px; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--gold-mid));
+    }
+    .title-tagline::after { transform: scaleX(-1); }
 
-    .divider {
-      width: 60%;
+    /* ─── Ornamental Divider ─────────────────────── */
+    .ornament {
+      width: 100%;
+      max-width: 280px;
+      display: flex;
+      align-items: center;
+      gap: var(--space-3);
+      color: var(--text-faint);
+    }
+    .ornament-line {
+      flex: 1;
       height: 1px;
-      background: linear-gradient(90deg, transparent, #c8860a55, #f5c84288, #c8860a55, transparent);
+      background: linear-gradient(90deg, transparent, var(--gold-dim), transparent);
+    }
+    .ornament-glyph {
+      font-size: 0.6rem;
+      color: var(--gold-mid);
+      letter-spacing: 0.1em;
+      flex-shrink: 0;
     }
 
+    /* ─── Buttons ────────────────────────────────── */
     .btn-group {
       width: 100%;
       display: flex;
       flex-direction: column;
-      gap: 0.85rem;
+      gap: var(--space-3);
     }
 
     .btn {
       display: flex;
       align-items: center;
-      justify-content: center;
-      gap: 0.65rem;
+      gap: var(--space-3);
       width: 100%;
-      padding: 1rem 1.5rem;
-      border-radius: 14px;
-      font-family: 'Inter', sans-serif;
-      font-size: clamp(0.9rem, 2.8vw, 1.05rem);
-      font-weight: 600;
-      letter-spacing: 0.04em;
+      padding: 0.875rem var(--space-5);
+      border-radius: var(--radius-xl);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
+      font-weight: 500;
+      letter-spacing: 0.03em;
       cursor: pointer;
       text-decoration: none;
       border: none;
-      transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
       position: relative;
       overflow: hidden;
+      transition:
+        transform 200ms var(--ease-out),
+        box-shadow 200ms var(--ease-out),
+        background 200ms ease,
+        border-color 200ms ease;
+      isolation: isolate;
     }
-    .btn::after {
+
+    /* Shimmer sweep on hover */
+    .btn::before {
       content: '';
       position: absolute;
-      inset: 0;
-      background: rgba(255,255,255,0.06);
-      opacity: 0;
-      transition: opacity 0.18s;
+      top: 0; left: -100%;
+      width: 60%; height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.08), transparent);
+      transform: skewX(-20deg);
+      transition: left 600ms ease;
     }
-    .btn:hover::after { opacity: 1; }
-    .btn:hover { transform: translateY(-3px) scale(1.015); }
-    .btn:active { transform: translateY(0) scale(0.98); }
+    .btn:hover::before { left: 160%; }
+    .btn:hover { transform: translateY(-2px) scale(1.008); }
+    .btn:active { transform: translateY(0) scale(0.98); transition-duration: 80ms; }
 
-    .btn-gold {
-      background: linear-gradient(135deg, #c8860a 0%, #f5c842 50%, #c8860a 100%);
+    /* Gold Primary */
+    .btn-primary {
+      background: linear-gradient(135deg,
+        oklch(0.55 0.14 60) 0%,
+        oklch(0.75 0.16 65) 45%,
+        oklch(0.60 0.15 55) 100%
+      );
       background-size: 200% 200%;
-      color: #1a0e00;
-      box-shadow: 0 4px 20px rgba(200,134,10,0.35);
-      animation: shimmer 4s ease infinite;
+      background-position: 0% 50%;
+      color: oklch(0.12 0.02 60);
+      font-weight: 600;
+      box-shadow:
+        0 2px 8px oklch(0.60 0.14 60 / 0.30),
+        0 0 0 1px oklch(0.70 0.15 65 / 0.20) inset;
+      animation: gold-shift 5s ease infinite;
     }
-    @keyframes shimmer {
-      0%,100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
+    @keyframes gold-shift {
+      0%, 100% { background-position: 0% 50%; }
+      50%       { background-position: 100% 50%; }
     }
-    .btn-gold:hover { box-shadow: 0 8px 32px rgba(245,200,66,0.55); }
-
-    .btn-outline {
-      background: rgba(200,134,10,0.08);
-      color: #f5c842;
-      border: 1.5px solid rgba(200,134,10,0.5);
-      box-shadow: 0 2px 12px rgba(200,134,10,0.1);
-    }
-    .btn-outline:hover {
-      background: rgba(200,134,10,0.18);
-      border-color: #f5c842;
-      box-shadow: 0 6px 24px rgba(245,200,66,0.25);
+    .btn-primary:hover {
+      box-shadow:
+        0 6px 24px oklch(0.60 0.14 60 / 0.50),
+        0 0 0 1px oklch(0.80 0.16 65 / 0.30) inset;
     }
 
+    /* Ghost outline */
+    .btn-ghost {
+      background: oklch(0.18 0.03 55 / 0.4);
+      color: var(--gold-pale);
+      border: 1px solid var(--border);
+      backdrop-filter: blur(8px);
+    }
+    .btn-ghost:hover {
+      background: oklch(0.22 0.05 58 / 0.6);
+      border-color: var(--border-hi);
+      box-shadow: 0 4px 20px oklch(0.60 0.14 60 / 0.15);
+    }
+
+    /* Spotify */
     .btn-spotify {
-      background: linear-gradient(135deg, #158a3e 0%, #1DB954 50%, #158a3e 100%);
-      background-size: 200% 200%;
-      color: #fff;
-      box-shadow: 0 4px 20px rgba(29,185,84,0.3);
-      animation: shimmer-green 4s ease infinite;
+      background: oklch(0.52 0.17 142 / 0.15);
+      color: oklch(0.72 0.17 142);
+      border: 1px solid oklch(0.52 0.17 142 / 0.35);
     }
-    @keyframes shimmer-green {
-      0%,100% { background-position: 0% 50%; }
-      50% { background-position: 100% 50%; }
+    .btn-spotify:hover {
+      background: oklch(0.52 0.17 142 / 0.25);
+      border-color: oklch(0.65 0.17 142 / 0.6);
+      box-shadow: 0 4px 20px oklch(0.52 0.17 142 / 0.20);
     }
-    .btn-spotify:hover { box-shadow: 0 8px 32px rgba(29,185,84,0.5); }
 
-    .btn-icon { font-size: 1.2em; flex-shrink: 0; }
+    /* Icon */
+    .btn-icon {
+      font-size: 1.15em;
+      flex-shrink: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      width: 1.5em; height: 1.5em;
+      filter: drop-shadow(0 1px 2px rgba(0,0,0,0.3));
+    }
+    .btn-label { flex: 1; text-align: left; }
+    .btn-arrow {
+      margin-left: auto;
+      opacity: 0;
+      transform: translateX(-4px);
+      transition: opacity 180ms ease, transform 180ms var(--ease-out);
+      font-size: 0.8em;
+      color: var(--gold-bright);
+    }
+    .btn:hover .btn-arrow {
+      opacity: 1;
+      transform: translateX(0);
+    }
 
+    /* ─── Footer ─────────────────────────────────── */
     .footer {
-      font-size: 0.72rem;
-      color: #4a3820;
-      letter-spacing: 0.08em;
-      text-align: center;
+      font-size: var(--text-xs);
+      color: var(--text-faint);
+      letter-spacing: 0.1em;
+      text-transform: uppercase;
     }
 
-    /* BOTTOM BANNER */
+    /* ─── Bottom Banner ──────────────────────────── */
     .bottom-banner {
       position: fixed;
-      bottom: 0;
-      left: 0;
+      bottom: 0; left: 0;
       width: 100%;
       z-index: 50;
-      background: linear-gradient(90deg, #3b1a04 0%, #5c2a07 50%, #3b1a04 100%);
-      border-top: 2px solid rgba(245,200,66,0.5);
-      box-shadow: 0 -6px 30px rgba(0,0,0,0.7);
-      padding: 0.75rem 1rem;
+      background: linear-gradient(135deg,
+        oklch(0.15 0.05 40) 0%,
+        oklch(0.20 0.07 45) 50%,
+        oklch(0.15 0.05 40) 100%
+      );
+      border-top: 1px solid oklch(0.60 0.14 60 / 0.40);
+      box-shadow: 0 -8px 40px oklch(0 0 0 / 0.7), 0 -1px 0 oklch(0.60 0.14 60 / 0.12) inset;
+      backdrop-filter: blur(16px) saturate(140%);
+      padding: var(--space-3) var(--space-5);
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 0.75rem;
+      gap: var(--space-3);
       flex-wrap: wrap;
-      animation: bannerSlideUp 0.5s ease 0.3s both;
+      animation: banner-up 0.5s var(--ease-out) 0.4s both;
     }
-    @keyframes bannerSlideUp {
+    @keyframes banner-up {
       from { transform: translateY(100%); opacity: 0; }
-      to   { transform: translateY(0);    opacity: 1; }
+      to   { transform: translateY(0);   opacity: 1; }
+    }
+
+    .banner-content {
+      display: flex;
+      align-items: center;
+      gap: var(--space-2);
+      flex-wrap: wrap;
+      justify-content: center;
+    }
+    .banner-salt {
+      font-size: 1.1rem;
     }
     .banner-text {
-      display: flex;
-      align-items: center;
-      gap: 0.4rem;
-      flex-wrap: wrap;
-      justify-content: center;
-    }
-    .banner-text span {
-      font-size: clamp(0.72rem, 2.4vw, 0.85rem);
-      color: #fde9c0;
-      letter-spacing: 0.03em;
+      font-size: var(--text-sm);
+      color: var(--gold-pale);
     }
     .banner-text strong {
-      color: #f5c842;
-      font-weight: 700;
+      color: var(--gold-bright);
+      font-weight: 600;
     }
+
     .banner-cta {
       display: inline-flex;
       align-items: center;
-      gap: 0.35rem;
-      padding: 0.45rem 1.1rem;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #c8860a, #f5c842);
-      color: #1a0e00;
-      font-size: clamp(0.72rem, 2.2vw, 0.82rem);
+      gap: var(--space-1);
+      padding: 0.4rem 1rem;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, var(--gold-mid), var(--gold-bright));
+      color: oklch(0.12 0.02 60);
+      font-size: var(--text-xs);
       font-weight: 700;
       text-decoration: none;
-      letter-spacing: 0.04em;
+      letter-spacing: 0.05em;
       white-space: nowrap;
-      flex-shrink: 0;
-      transition: transform 0.15s, box-shadow 0.15s;
-      box-shadow: 0 2px 10px rgba(200,134,10,0.5);
+      transition: transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+      box-shadow: 0 2px 12px oklch(0.60 0.14 60 / 0.40);
     }
     .banner-cta:hover {
       transform: translateY(-2px);
-      box-shadow: 0 5px 18px rgba(245,200,66,0.6);
+      box-shadow: 0 6px 20px oklch(0.60 0.14 60 / 0.55);
     }
+    .banner-cta:active { transform: translateY(0); }
+
     .banner-close {
       background: none;
       border: none;
-      color: #fde9c0;
-      font-size: 1rem;
+      color: var(--text-muted);
+      font-size: 0.85rem;
       cursor: pointer;
-      padding: 0.2rem 0.4rem;
+      padding: var(--space-1) var(--space-2);
+      border-radius: var(--radius-sm);
       flex-shrink: 0;
-      transition: color 0.15s, opacity 0.15s;
+      transition: color 150ms ease, background 150ms ease;
       line-height: 1;
-      opacity: 0.7;
     }
-    .banner-close:hover { opacity: 1; color: #f5c842; }
+    .banner-close:hover {
+      color: var(--gold-bright);
+      background: oklch(0.60 0.14 60 / 0.12);
+    }
 
-    /* FLOATING BUTTON */
-    .fab-mitla {
+    /* ─── FAB ────────────────────────────────────── */
+    .fab {
       position: fixed;
-      bottom: 1.2rem;
-      right: 1.2rem;
+      bottom: var(--space-5);
+      right: var(--space-5);
       z-index: 50;
       display: none;
       align-items: center;
-      gap: 0.5rem;
-      padding: 0.65rem 1.1rem;
-      border-radius: 999px;
-      background: linear-gradient(135deg, #c8860a, #f5c842);
-      color: #1a0e00;
-      font-family: 'Inter', sans-serif;
-      font-size: 0.8rem;
+      gap: var(--space-2);
+      padding: 0.6rem 1.1rem;
+      border-radius: var(--radius-full);
+      background: linear-gradient(135deg, var(--gold-mid), var(--gold-bright));
+      color: oklch(0.12 0.02 60);
+      font-family: var(--font-body);
+      font-size: var(--text-sm);
       font-weight: 700;
       text-decoration: none;
       letter-spacing: 0.04em;
-      box-shadow: 0 4px 20px rgba(200,134,10,0.55), 0 0 0 0 rgba(245,200,66,0.4);
-      transition: transform 0.15s, box-shadow 0.15s;
       white-space: nowrap;
+      box-shadow: 0 4px 20px oklch(0.60 0.14 60 / 0.50);
+      transition: transform 150ms var(--ease-out), box-shadow 150ms var(--ease-out);
+      animation: fab-pulse 2.8s ease infinite;
     }
-    .fab-mitla.visible {
-      display: flex;
-      animation: fabPulse 2.5s ease infinite;
-    }
-    .fab-mitla:hover {
-      transform: translateY(-3px) scale(1.05);
-      box-shadow: 0 8px 28px rgba(245,200,66,0.65);
+    .fab.visible { display: flex; }
+    .fab:hover {
+      transform: translateY(-3px) scale(1.04);
+      box-shadow: 0 8px 28px oklch(0.60 0.14 60 / 0.65);
       animation: none;
     }
-    @keyframes fabPulse {
-      0%, 100% { box-shadow: 0 4px 20px rgba(200,134,10,0.55), 0 0 0 0 rgba(245,200,66,0.4); }
-      50%       { box-shadow: 0 4px 20px rgba(200,134,10,0.55), 0 0 0 8px rgba(245,200,66,0); }
+    .fab:active { transform: translateY(0) scale(0.97); }
+    @keyframes fab-pulse {
+      0%, 100% { box-shadow: 0 4px 20px oklch(0.60 0.14 60 / 0.50), 0 0 0 0 oklch(0.75 0.16 65 / 0.40); }
+      50%       { box-shadow: 0 4px 20px oklch(0.60 0.14 60 / 0.50), 0 0 0 9px oklch(0.75 0.16 65 / 0); }
     }
 
-    /* MODAL */
+    /* ─── Modal ──────────────────────────────────── */
     .modal-overlay {
       display: none;
       position: fixed;
       inset: 0;
-      background: rgba(0,0,0,0.75);
-      backdrop-filter: blur(6px);
+      background: oklch(0 0 0 / 0.70);
+      backdrop-filter: blur(10px) saturate(80%);
       z-index: 100;
-      align-items: center;
+      align-items: flex-end;
       justify-content: center;
-      padding: 1rem;
+      padding: 0;
+    }
+    @media (min-width: 540px) {
+      .modal-overlay {
+        align-items: center;
+        padding: 1rem;
+      }
     }
     .modal-overlay.active { display: flex; }
 
     .modal {
-      background: linear-gradient(160deg, #1a1208 0%, #0f0b06 100%);
-      border: 1px solid rgba(200,134,10,0.35);
-      border-radius: 22px;
-      padding: 2rem 1.5rem;
+      background: linear-gradient(160deg, var(--surface-3) 0%, var(--surface) 100%);
+      border: 1px solid var(--border);
+      border-bottom: none;
+      border-radius: var(--radius-xl) var(--radius-xl) 0 0;
+      padding: 2.5rem var(--space-6) 2.5rem;
       width: 100%;
-      max-width: 380px;
-      box-shadow: 0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(200,134,10,0.1);
+      max-width: 440px;
+      box-shadow:
+        0 -24px 60px oklch(0 0 0 / 0.60),
+        0 0 0 1px oklch(0.60 0.14 60 / 0.08) inset;
       position: relative;
-      animation: slideUp 0.25s ease;
+      animation: sheet-up 0.32s var(--ease-out);
     }
-    @keyframes slideUp { from { transform: translateY(30px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+    @media (min-width: 540px) {
+      .modal {
+        border-bottom: 1px solid var(--border);
+        border-radius: var(--radius-xl);
+        animation: modal-in 0.28s var(--ease-out);
+      }
+    }
+    @keyframes sheet-up {
+      from { transform: translateY(100%); }
+      to   { transform: translateY(0); }
+    }
+    @keyframes modal-in {
+      from { transform: translateY(16px) scale(0.97); opacity: 0; }
+      to   { transform: translateY(0)   scale(1);    opacity: 1; }
+    }
+
+    /* Bottom sheet handle */
+    .modal-handle {
+      position: absolute;
+      top: 10px; left: 50%;
+      transform: translateX(-50%);
+      width: 36px; height: 4px;
+      background: oklch(0.60 0.14 60 / 0.30);
+      border-radius: var(--radius-full);
+    }
+    @media (min-width: 540px) { .modal-handle { display: none; } }
 
     .modal-close {
       position: absolute;
-      top: 1rem; right: 1rem;
-      background: rgba(200,134,10,0.15);
-      border: 1px solid rgba(200,134,10,0.3);
-      color: #f5c842;
-      width: 32px; height: 32px;
+      top: var(--space-4); right: var(--space-4);
+      background: oklch(0.60 0.14 60 / 0.12);
+      border: 1px solid oklch(0.60 0.14 60 / 0.20);
+      color: var(--gold-bright);
+      width: 30px; height: 30px;
       border-radius: 50%;
-      font-size: 1rem;
+      font-size: 0.8rem;
       cursor: pointer;
       display: flex; align-items: center; justify-content: center;
-      transition: background 0.15s;
+      transition: background 150ms ease, box-shadow 150ms ease;
     }
-    .modal-close:hover { background: rgba(200,134,10,0.3); }
+    .modal-close:hover {
+      background: oklch(0.60 0.14 60 / 0.25);
+      box-shadow: 0 0 0 4px oklch(0.60 0.14 60 / 0.10);
+    }
 
-    .modal-header { text-align: center; margin-bottom: 1.5rem; }
-    .modal-icon { font-size: 2.5rem; margin-bottom: 0.5rem; }
+    .modal-header { text-align: center; margin-bottom: var(--space-6); }
+    .modal-icon-wrap {
+      width: 52px; height: 52px;
+      margin: 0 auto var(--space-3);
+      border-radius: var(--radius-lg);
+      background: oklch(0.52 0.17 142 / 0.12);
+      border: 1px solid oklch(0.52 0.17 142 / 0.25);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.4rem;
+    }
     .modal-header h2 {
-      font-family: 'Playfair Display', serif;
-      color: #f5c842;
-      font-size: 1.3rem;
-      margin-bottom: 0.3rem;
+      font-family: var(--font-display);
+      color: var(--gold-bright);
+      font-size: var(--text-xl);
+      font-weight: 600;
+      letter-spacing: 0.01em;
+      margin-bottom: var(--space-1);
     }
-    .modal-header p { color: #a07840; font-size: 0.82rem; }
+    .modal-header p {
+      color: var(--text-muted);
+      font-size: var(--text-sm);
+    }
 
-    .modal-btns { display: flex; flex-direction: column; gap: 0.75rem; }
+    .modal-btns { display: flex; flex-direction: column; gap: var(--space-3); }
 
-    .modal-btn {
+    .playlist-btn {
       display: flex;
       align-items: center;
-      gap: 0.75rem;
-      padding: 0.9rem 1.2rem;
-      border-radius: 12px;
+      gap: var(--space-4);
+      padding: var(--space-4);
+      border-radius: var(--radius-lg);
       text-decoration: none;
-      font-weight: 600;
-      font-size: 0.95rem;
-      transition: transform 0.15s, box-shadow 0.15s;
-      background: linear-gradient(135deg, #158a3e, #1DB954);
-      color: #fff;
-      box-shadow: 0 3px 14px rgba(29,185,84,0.25);
+      background: oklch(0.52 0.17 142 / 0.08);
+      border: 1px solid oklch(0.52 0.17 142 / 0.20);
+      transition:
+        transform 180ms var(--ease-out),
+        background 180ms ease,
+        border-color 180ms ease,
+        box-shadow 180ms ease;
+      position: relative;
+      overflow: hidden;
     }
-    .modal-btn:hover {
+    .playlist-btn::before {
+      content: '';
+      position: absolute;
+      inset: 0;
+      background: linear-gradient(135deg,
+        oklch(0.52 0.17 142 / 0.05) 0%,
+        transparent 60%
+      );
+    }
+    .playlist-btn:hover {
       transform: translateY(-2px);
-      box-shadow: 0 6px 22px rgba(29,185,84,0.45);
+      background: oklch(0.52 0.17 142 / 0.15);
+      border-color: oklch(0.65 0.17 142 / 0.45);
+      box-shadow: 0 6px 24px oklch(0.52 0.17 142 / 0.18);
     }
-    .modal-btn-icon { font-size: 1.4rem; }
-    .modal-btn-text { display: flex; flex-direction: column; }
-    .modal-btn-label { font-size: 0.78rem; opacity: 0.8; font-weight: 400; }
-    .modal-btn-name { font-size: 1rem; }
+    .playlist-btn:active { transform: translateY(0); transition-duration: 80ms; }
 
-    @media (min-width: 640px) {
-      .container { max-width: 520px; }
-      .btn { padding: 1.1rem 2rem; }
+    .playlist-num {
+      width: 36px; height: 36px;
+      border-radius: var(--radius-md);
+      background: oklch(0.52 0.17 142 / 0.20);
+      border: 1px solid oklch(0.52 0.17 142 / 0.30);
+      display: flex; align-items: center; justify-content: center;
+      font-size: 1.1rem;
+      flex-shrink: 0;
     }
-    @media (min-width: 1024px) {
-      .container { max-width: 560px; }
+    .playlist-info { flex: 1; min-width: 0; }
+    .playlist-label {
+      font-size: var(--text-xs);
+      color: oklch(0.65 0.17 142);
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      margin-bottom: 2px;
+    }
+    .playlist-name {
+      font-size: var(--text-base);
+      color: oklch(0.82 0.12 142);
+      font-weight: 500;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .playlist-arrow {
+      color: oklch(0.52 0.17 142 / 0.5);
+      font-size: 0.9rem;
+      flex-shrink: 0;
+      transition: transform 180ms var(--ease-out), color 180ms ease;
+    }
+    .playlist-btn:hover .playlist-arrow {
+      transform: translateX(3px);
+      color: oklch(0.72 0.17 142);
+    }
+
+    /* ─── Page entrance animation ────────────────── */
+    .container > * {
+      opacity: 0;
+      animation: fade-rise 0.5s var(--ease-out) both;
+    }
+    .container > *:nth-child(1) { animation-delay: 0.08s; }
+    .container > *:nth-child(2) { animation-delay: 0.16s; }
+    .container > *:nth-child(3) { animation-delay: 0.22s; }
+    .container > *:nth-child(4) { animation-delay: 0.28s; }
+    .container > *:nth-child(5) { animation-delay: 0.34s; }
+    .container > *:nth-child(6) { animation-delay: 0.40s; }
+    @keyframes fade-rise {
+      from { opacity: 0; clip-path: inset(10% 0 0 0); }
+      to   { opacity: 1; clip-path: inset(0 0 0 0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after { animation-duration: 0.01ms !important; transition-duration: 0.01ms !important; }
+    }
+
+    /* ─── Responsive ──────────────────────────────── */
+    @media (min-width: 480px) {
+      .container { max-width: 400px; }
+      .btn { padding: 1rem var(--space-6); }
+    }
+    @media (min-width: 768px) {
+      .container { max-width: 420px; }
     }
   </style>
 </head>
 <body>
 
-<div class="container">
-  <div class="logo-wrap">
+<!-- Ambient light layers -->
+<div class="bg-ambient" aria-hidden="true"></div>
+<div class="bg-grain" aria-hidden="true"></div>
+
+<main class="container">
+
+  <!-- Logo -->
+  <div class="logo-wrap" aria-hidden="true">
+    <div class="logo-glow"></div>
     <div class="logo-ring"></div>
     <div class="logo-inner">
-      <img src="https://i.ibb.co/jkWp21kD/IMG-4398.jpg" alt="Logo Barbacoa de la Casa Vieja" />
+      <img
+        src="https://i.ibb.co/jkWp21kD/IMG-4398.jpg"
+        alt="Logo Barbacoa de la Casa Vieja"
+        width="148" height="148"
+        loading="eager"
+      />
     </div>
   </div>
 
+  <!-- Title -->
   <div class="title-block">
-    <h1>Barbacoa de la<br>Casa Vieja</h1>
-    <p>✦ Tradición en cada bocado ✦</p>
+    <h1>Barbacoa<br><em>de la Casa Vieja</em></h1>
+    <p class="title-tagline">Tradición en cada bocado</p>
   </div>
 
-  <div class="divider"></div>
+  <!-- Divider -->
+  <div class="ornament" aria-hidden="true">
+    <div class="ornament-line"></div>
+    <span class="ornament-glyph">✦ ✦ ✦</span>
+    <div class="ornament-line"></div>
+  </div>
 
-  <div class="btn-group">
-    <a href="https://Barbacoa-La-Casa-Vieja.github.io/Men-" target="_blank" class="btn btn-gold">
-      <span class="btn-icon">🍽️</span> Menú
+  <!-- Buttons -->
+  <nav class="btn-group" aria-label="Acciones principales">
+    <a href="https://Barbacoa-La-Casa-Vieja.github.io/Men-" target="_blank" rel="noopener noreferrer" class="btn btn-primary">
+      <span class="btn-icon" aria-hidden="true">🍽️</span>
+      <span class="btn-label">Ver Menú</span>
+      <span class="btn-arrow" aria-hidden="true">↗</span>
     </a>
-    <a href="https://tally.so/r/yPDV1x" target="_blank" class="btn btn-outline">
-      <span class="btn-icon">⭐</span> Califícanos
+    <a href="https://tally.so/r/yPDV1x" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">
+      <span class="btn-icon" aria-hidden="true">⭐</span>
+      <span class="btn-label">Califícanos</span>
+      <span class="btn-arrow" aria-hidden="true">↗</span>
     </a>
-    <a href="https://tally.so/r/5B2WVE" target="_blank" class="btn btn-outline">
-      <span class="btn-icon">👨‍🍳</span> Califica a tu mesero
+    <a href="https://tally.so/r/5B2WVE" target="_blank" rel="noopener noreferrer" class="btn btn-ghost">
+      <span class="btn-icon" aria-hidden="true">👨‍🍳</span>
+      <span class="btn-label">Califica a tu mesero</span>
+      <span class="btn-arrow" aria-hidden="true">↗</span>
     </a>
-    <button class="btn btn-spotify" onclick="openModal()">
-      <span class="btn-icon">🎵</span> Nuestras listas de reproducción Spotify
+    <button class="btn btn-spotify" onclick="openModal()" type="button" aria-haspopup="dialog">
+      <span class="btn-icon" aria-hidden="true">🎵</span>
+      <span class="btn-label">Nuestras playlists en Spotify</span>
+      <span class="btn-arrow" aria-hidden="true">↗</span>
     </button>
+  </nav>
+
+  <!-- Divider -->
+  <div class="ornament" aria-hidden="true">
+    <div class="ornament-line"></div>
+    <span class="ornament-glyph">✦ ✦ ✦</span>
+    <div class="ornament-line"></div>
   </div>
 
-  <div class="divider"></div>
+  <!-- Footer -->
   <p class="footer">© 2026 Barbacoa de la Casa Vieja</p>
-</div>
+
+</main>
 
 <!-- Bottom Banner -->
-<div class="bottom-banner" id="bottomBanner">
-  <div class="banner-text">
-    <span>🧂 <strong>¿Ya probaste nuestra sal de gusano?</strong> Encuéntrala aquí y más en <strong>Gran Mitla</strong></span>
+<div class="bottom-banner" id="bottomBanner" role="complementary" aria-label="Promoción Gran Mitla">
+  <div class="banner-content">
+    <span class="banner-salt" aria-hidden="true">🧂</span>
+    <span class="banner-text">
+      <strong>¿Ya probaste nuestra sal de gusano?</strong>
+      Encuéntrala en <strong>Gran Mitla</strong>
+    </span>
   </div>
-  <a href="https://cronos6xlab.github.io/Barbacoa-La_Casa_Vieja/" target="_blank" class="banner-cta">
-    Ver más →
+  <a href="https://cronos6xlab.github.io/Barbacoa-La_Casa_Vieja/" target="_blank" rel="noopener noreferrer" class="banner-cta">
+    Ver más ↗
   </a>
-  <button class="banner-close" onclick="closeBanner()" title="Cerrar">✕</button>
+  <button class="banner-close" onclick="closeBanner()" type="button" aria-label="Cerrar anuncio">✕</button>
 </div>
 
-<!-- Floating Button -->
-<a href="https://cronos6xlab.github.io/Barbacoa-La_Casa_Vieja/" target="_blank" class="fab-mitla" id="fabMitla">
+<!-- FAB -->
+<a href="https://cronos6xlab.github.io/Barbacoa-La_Casa_Vieja/" target="_blank" rel="noopener noreferrer" class="fab" id="fabMitla" aria-label="Ver Gran Mitla">
   🧂 Gran Mitla
 </a>
 
 <!-- Spotify Modal -->
-<div class="modal-overlay" id="spotifyModal" onclick="closeOnOverlay(event)">
+<div
+  class="modal-overlay"
+  id="spotifyModal"
+  role="dialog"
+  aria-modal="true"
+  aria-labelledby="modalTitle"
+  onclick="closeOnOverlay(event)"
+>
   <div class="modal">
-    <button class="modal-close" onclick="closeModal()">✕</button>
+    <div class="modal-handle" aria-hidden="true"></div>
+    <button class="modal-close" onclick="closeModal()" type="button" aria-label="Cerrar">✕</button>
+
     <div class="modal-header">
-      <div class="modal-icon">🎶</div>
-      <h2>Nuestras Playlists</h2>
-      <p>Nuestra selección de música</p>
+      <div class="modal-icon-wrap" aria-hidden="true">🎶</div>
+      <h2 id="modalTitle">Nuestras Playlists</h2>
+      <p>Música seleccionada para tu visita</p>
     </div>
+
     <div class="modal-btns">
-      <a href="https://open.spotify.com/playlist/3H1RUHkF9ZYRVuBELbVIcE?si=QI3nHnm9RQi-Q79Gew6zPw&pi=TmERreIZSSe3e" target="_blank" class="modal-btn">
-        <span class="modal-btn-icon">🎸</span>
-        <span class="modal-btn-text">
-          <span class="modal-btn-label">Lista 1</span>
-          <span class="modal-btn-name">Playlist Casa Vieja Vol. 1</span>
-        </span>
+      <a
+        href="https://open.spotify.com/playlist/3H1RUHkF9ZYRVuBELbVIcE?si=QI3nHnm9RQi-Q79Gew6zPw&pi=TmERreIZSSe3e"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="playlist-btn"
+      >
+        <div class="playlist-num" aria-hidden="true">🎸</div>
+        <div class="playlist-info">
+          <div class="playlist-label">Lista 1</div>
+          <div class="playlist-name">Playlist Casa Vieja Vol. 1</div>
+        </div>
+        <span class="playlist-arrow" aria-hidden="true">→</span>
       </a>
-      <a href="https://open.spotify.com/playlist/3bkERjsiZIIOGH1NerBhb4?si=OlPoxRK7Tcq7JXXN4nebYQ&pi=q4iRgAlcQhihE" target="_blank" class="modal-btn">
-        <span class="modal-btn-icon">🎺</span>
-        <span class="modal-btn-text">
-          <span class="modal-btn-label">Lista 2</span>
-          <span class="modal-btn-name">Playlist Casa Vieja Vol. 2</span>
-        </span>
+
+      <a
+        href="https://open.spotify.com/playlist/3bkERjsiZIIOGH1NerBhb4?si=OlPoxRK7Tcq7JXXN4nebYQ&pi=q4iRgAlcQhihE"
+        target="_blank"
+        rel="noopener noreferrer"
+        class="playlist-btn"
+      >
+        <div class="playlist-num" aria-hidden="true">🎺</div>
+        <div class="playlist-info">
+          <div class="playlist-label">Lista 2</div>
+          <div class="playlist-name">Playlist Casa Vieja Vol. 2</div>
+        </div>
+        <span class="playlist-arrow" aria-hidden="true">→</span>
       </a>
     </div>
   </div>
 </div>
 
 <script>
+  /* ── Modal ── */
   function openModal() {
-    document.getElementById('spotifyModal').classList.add('active');
+    const m = document.getElementById('spotifyModal');
+    m.classList.add('active');
     document.body.style.overflow = 'hidden';
+    m.querySelector('.modal-close').focus();
   }
   function closeModal() {
     document.getElementById('spotifyModal').classList.remove('active');
@@ -466,16 +864,17 @@
   }
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeModal(); });
 
+  /* ── Banner → FAB ── */
   function closeBanner() {
     const banner = document.getElementById('bottomBanner');
-    banner.style.transition = 'transform 0.3s ease, opacity 0.3s ease';
+    const fab = document.getElementById('fabMitla');
+    banner.style.transition = 'transform 0.3s var(--ease-in), opacity 0.3s ease';
     banner.style.transform = 'translateY(100%)';
     banner.style.opacity = '0';
     setTimeout(() => {
       banner.style.display = 'none';
-      const fab = document.getElementById('fabMitla');
       fab.classList.add('visible');
-    }, 300);
+    }, 310);
   }
 </script>
 
